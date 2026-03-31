@@ -1,0 +1,7 @@
+[package]
+name = "maak-watch"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+notify-debouncer-mini = "0.6.0"
