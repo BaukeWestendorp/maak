@@ -1,7 +1,8 @@
-use gpui::{App, Global, Hsla, Pixels, ReadGlobal, px, rgb};
+use gpui::{App, Global, Hsla, Pixels, ReadGlobal, WindowAppearance, hsla, px, rgb};
 
 pub(crate) fn init(cx: &mut App) {
-    cx.set_global(Theme::default());
+    // FIXME: Theme does not change when the system appearance changes.
+    cx.set_global(Theme::system(cx));
 }
 
 pub trait ActiveTheme {
@@ -86,6 +87,54 @@ pub struct Theme {
 }
 
 impl Theme {
+    pub fn system(cx: &App) -> Self {
+        match cx.window_appearance() {
+            WindowAppearance::Light => Self::light(),
+            WindowAppearance::VibrantLight => Self::light(),
+            WindowAppearance::Dark => Self::dark(),
+            WindowAppearance::VibrantDark => Self::dark(),
+        }
+    }
+
+    pub fn light() -> Self {
+        Self {
+            font_size: px(14.0),
+            radius: px(3.0),
+            shadow: true,
+
+            bg_primary: rgb(0xffffff).into(),
+            bg_secondary: rgb(0xf4f4f4).into(),
+            bg_tertiary: rgb(0xeaeaea).into(),
+            bg_selected: hsla(0.6, 0.508, 0.89, 1.).into(),
+            bg_selected_extra: hsla(0.605, 0.213, 0.76, 1.).into(),
+            bg_table: rgb(0xffffff).into(),
+            bg_table_odd: rgb(0xf9f9f8).into(),
+            bg_tile_header: hsla(0.577, 0.386, 0.8, 1.).into(),
+
+            fg_primary: hsla(0., 0., 0.07, 1.).into(),
+            fg_secondary: hsla(0., 0., 0.3, 1.).into(),
+            fg_tertiary: rgb(0x808080).into(),
+            fg_selected: hsla(0.562, 0.912, 0.15, 1.).into(),
+            fg_tile_header: hsla(0.554, 0.667, 0.1, 1.).into(),
+
+            border_primary: hsla(0., 0., 0.84, 1.).into(),
+            border_secondary: hsla(0., 0., 0.8, 1.).into(),
+            border_tertiary: hsla(0., 0., 0.75, 1.).into(),
+            border_selected: hsla(0.561, 0.912, 0.4, 1.).into(),
+            border_tile_header: hsla(0.571, 0.386, 0.725, 1.).into(),
+
+            accent: rgb(0x3bb2f6).into(),
+            warning: rgb(0xffc94d).into(),
+            error: rgb(0xed2320).into(),
+            success: rgb(0x3bb273).into(),
+
+            title_bar: hsla(0.083, 0.037, 0.894, 1.).into(),
+            title_bar_border: hsla(0., 0., 0.8, 1.).into(),
+
+            button_depression: px(1.0),
+        }
+    }
+
     pub fn dark() -> Self {
         Self {
             font_size: px(14.0),
@@ -128,7 +177,7 @@ impl Theme {
 
 impl Default for Theme {
     fn default() -> Self {
-        Self::dark()
+        Self::light()
     }
 }
 
