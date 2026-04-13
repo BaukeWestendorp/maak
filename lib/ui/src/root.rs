@@ -1,4 +1,5 @@
-use gpui::{AnyView, Window, div, prelude::*};
+use gpui::prelude::*;
+use gpui::{AnyView, Window, div};
 
 use crate::ActiveTheme;
 

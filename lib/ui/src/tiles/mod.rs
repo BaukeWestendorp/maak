@@ -1,4 +1,5 @@
-use gpui::{App, Entity, FontWeight, Pixels, Size, Window, div, prelude::*, px, size};
+use gpui::prelude::*;
+use gpui::{App, Entity, FontWeight, Pixels, Size, Window, div, px, size};
 
 mod delegate;
 mod state;

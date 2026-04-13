@@ -16,12 +16,9 @@ pub trait ElementExt: ParentElement + Sized {
         F: FnOnce(Bounds<Pixels>, &mut Window, &mut App) + 'static,
     {
         self.child(
-            canvas(
-                move |bounds, window, cx| f(bounds, window, cx),
-                |_, _, _, _| {},
-            )
-            .absolute()
-            .size_full(),
+            canvas(move |bounds, window, cx| f(bounds, window, cx), |_, _, _, _| {})
+                .absolute()
+                .size_full(),
         )
     }
 }

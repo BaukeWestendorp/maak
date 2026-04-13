@@ -1,4 +1,5 @@
-use gpui::{App, Pixels, StyleRefinement, Window, prelude::*, px, svg};
+use gpui::prelude::*;
+use gpui::{App, Pixels, StyleRefinement, Window, px, svg};
 
 use crate::StyledExt;
 
@@ -12,11 +13,7 @@ pub struct Icon {
 
 impl Icon {
     pub fn new(variant: IconVariant, size: IconSize) -> Self {
-        Self {
-            variant,
-            size,
-            style: StyleRefinement::default(),
-        }
+        Self { variant, size, style: StyleRefinement::default() }
     }
 }
 

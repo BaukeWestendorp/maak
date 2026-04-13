@@ -1,6 +1,6 @@
 use gpui::prelude::*;
 use gpui::{Window, div};
-use maak_ui::{article, h1, h2, h3, h4, h5, h6, link, p, sub};
+use maak_ui::{article, h1, h2, h3, h4, h5, h6, link, sub};
 
 pub struct TypoPreview {}
 
@@ -19,8 +19,6 @@ impl Render for TypoPreview {
             h4("Header 4", cx),
             h5("Header 5", cx),
             h6("Header 6", cx),
-            // FIXME: Paragraph goes off screen.
-            p("Paragraph: Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit, cum provident? Cumque sequi hic, corrupti doloremque laboriosam nemo unde, ducimus tenetur impedit officiis esse voluptatibus. Minima aperiam incidunt explicabo voluptates.", cx),
             link("Click Here for a cool website!", "https://baukewestendorp.nl", cx),
             sub("Subtext", cx),
         ]))

@@ -2,20 +2,26 @@ use std::collections::HashMap;
 
 use gpui::prelude::*;
 use gpui::{App, Entity, Window, div};
-use maak_ui::{Column, Table, TableDelegate, TableState, section};
+use maak_ui::{ActiveTheme, Cell, Column, Table, TableDelegate, TableState, section};
 
 pub struct TablePreview {
-    table: Entity<TableState<PreviewTableDelegate>>,
+    table_a: Entity<TableState<PreviewTableDelegate>>,
+    table_b: Entity<TableState<PreviewTableDelegate>>,
 }
 
 impl TablePreview {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
-        let selection = cx.new(|_| Vec::new());
+        let selection_a = cx.new(|_| Vec::new());
+        let selection_b = cx.new(|_| Vec::new());
 
         Self {
-            table: cx.new(|cx| {
+            table_a: cx.new(|cx| {
                 let delegate = PreviewTableDelegate::new();
-                TableState::new(delegate, selection, window, cx)
+                TableState::new(delegate, selection_a, window, cx)
+            }),
+            table_b: cx.new(|cx| {
+                let delegate = PreviewTableDelegate::new();
+                TableState::new(delegate, selection_b, window, cx)
             }),
         }
     }
@@ -23,26 +29,29 @@ impl TablePreview {
 
 impl Render for TablePreview {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        // FIXME: Tables look fucked up.
         div()
-            .p_2()
             .size_full()
             .flex()
             .flex_col()
             .gap_2()
+            .p_2()
             .child(
-                section("Table Full Width", cx)
-                    .w_full()
-                    .h_48()
-                    .overflow_hidden()
-                    .child(Table::new(self.table.clone())),
+                section("Table Full").w_full().h_24().child(
+                    div()
+                        .size_full()
+                        .border_1()
+                        .border_color(cx.theme().border_primary)
+                        .child(Table::new("table-a", self.table_a.clone())),
+                ),
             )
             .child(
-                section("Table Small Width", cx)
-                    .w_48()
-                    .h_48()
-                    .overflow_hidden()
-                    .child(Table::new(self.table.clone())),
+                section("Table Small").w_48().h_24().child(
+                    div()
+                        .size_full()
+                        .border_1()
+                        .border_color(cx.theme().border_primary)
+                        .child(Table::new("table-b", self.table_b.clone())),
+                ),
             )
     }
 }
@@ -76,12 +85,8 @@ impl PreviewTableDelegate {
 impl TableDelegate for PreviewTableDelegate {
     type RowId = String;
 
-    fn column_count(&self, _cx: &App) -> usize {
-        self.columns.len()
-    }
-
-    fn column(&self, col_ix: usize, _cx: &App) -> &Column {
-        &self.columns[col_ix]
+    fn columns(&self, _cx: &App) -> &[Column] {
+        &self.columns
     }
 
     fn root_row_ids(&self, _cx: &App) -> Vec<Self::RowId> {
@@ -90,14 +95,12 @@ impl TableDelegate for PreviewTableDelegate {
 
     fn render_cell(
         &self,
-        row_id: &Self::RowId,
-        col_ix: usize,
+        cell: Cell<Self>,
         _window: &mut Window,
-        cx: &App,
+        _cx: &mut Context<TableState<Self>>,
     ) -> impl IntoElement {
-        let item = self.items.get(row_id).unwrap();
-
-        let content = match self.column(col_ix, cx).id().as_str() {
+        let item = self.items.get(cell.row_id()).expect("should have item");
+        let content = match cell.column().id().as_str() {
             "alpha" => item.alpha.to_string().into_any_element(),
             "beta" => item.beta.to_string().into_any_element(),
             "gamma" => item.gamma.to_string().into_any_element(),

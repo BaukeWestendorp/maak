@@ -59,7 +59,7 @@ impl RenderOnce for Tabs {
         let selected_id = self.state.read(cx).selected().cloned();
         let (tab_buttons, content) = {
             let mut tab_buttons = Vec::new();
-            let mut content: AnyElement = div().into_any();
+            let mut content: AnyElement = div().into_any_element();
 
             for tab in self.tabs.into_iter() {
                 let is_selected = selected_id.as_ref().map_or(false, |sel| sel == &tab.id);

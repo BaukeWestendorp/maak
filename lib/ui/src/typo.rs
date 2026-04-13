@@ -69,10 +69,6 @@ pub fn link(text: impl Into<String>, url: &'static str, cx: &App) -> Div {
     )
 }
 
-pub fn p(text: impl Into<String>, cx: &App) -> Div {
-    div().w_full().text_color(cx.theme().fg_primary).child(text.into())
-}
-
 pub fn sub(text: impl Into<String>, cx: &App) -> Div {
     div().text_xs().italic().text_color(cx.theme().fg_secondary).child(text.into())
 }

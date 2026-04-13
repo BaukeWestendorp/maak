@@ -36,71 +36,81 @@ impl Render for ThemePreview {
 
         let content = div()
             .p_2()
-            .gap_2()
+            .flex()
             .flex_col()
-            .bg(t.bg_primary)
-            .child(section("Backgrounds", cx))
+            .gap_2()
             .child(
-                div()
-                    .flex_col()
-                    .gap_2()
-                    .child(row("bg_primary", t.bg_primary, t.fg_primary, cx))
-                    .child(row("bg_secondary", t.bg_secondary, t.fg_primary, cx))
-                    .child(row("bg_tertiary", t.bg_tertiary, t.fg_primary, cx))
-                    .child(row("bg_selected", t.bg_selected, t.fg_selected, cx))
-                    .child(row("bg_selected_extra", t.bg_selected_extra, t.fg_selected, cx))
-                    .child(row("bg_table", t.bg_table, t.fg_primary, cx))
-                    .child(row("bg_table_odd", t.bg_table_odd, t.fg_primary, cx))
-                    .child(row("bg_tile_header", t.bg_tile_header, t.fg_tile_header, cx)),
+                section("Backgrounds").child(
+                    div()
+                        .flex_col()
+                        .gap_2()
+                        .child(row("bg_primary", t.bg_primary, t.fg_primary, cx))
+                        .child(row("bg_secondary", t.bg_secondary, t.fg_primary, cx))
+                        .child(row("bg_tertiary", t.bg_tertiary, t.fg_primary, cx))
+                        .child(row("bg_selected", t.bg_selected, t.fg_primary, cx))
+                        .child(row("bg_selected_extra", t.bg_selected_extra, t.fg_primary, cx))
+                        .child(row("bg_table", t.bg_table, t.fg_primary, cx))
+                        .child(row("bg_table_odd", t.bg_table_odd, t.fg_primary, cx))
+                        .child(row("bg_tile_header", t.bg_tile_header, t.fg_primary, cx)),
+                ),
             )
-            .child(section("Foregrounds", cx))
             .child(
-                div()
-                    .flex_col()
-                    .gap_2()
-                    .child(row("fg_primary", t.fg_primary, t.fg_primary, cx))
-                    .child(row("fg_secondary", t.fg_secondary, t.fg_secondary, cx))
-                    .child(row("fg_tertiary", t.fg_tertiary, t.fg_tertiary, cx))
-                    .child(row("fg_selected", t.fg_selected, t.fg_selected, cx))
-                    .child(row("fg_tile_header", t.fg_tile_header, t.fg_tile_header, cx)),
+                section("Foregrounds").child(
+                    div()
+                        .flex_col()
+                        .gap_2()
+                        .child(row("fg_primary", t.fg_primary, t.fg_primary, cx))
+                        .child(row("fg_secondary", t.fg_secondary, t.fg_secondary, cx))
+                        .child(row("fg_tertiary", t.fg_tertiary, t.fg_tertiary, cx))
+                        .child(row("fg_selected", t.fg_selected, t.fg_selected, cx))
+                        .child(row("fg_tile_header", t.fg_tile_header, t.fg_tile_header, cx)),
+                ),
             )
-            .child(section("Borders", cx))
             .child(
-                div()
-                    .flex_col()
-                    .gap_2()
-                    .child(row("border_primary", t.border_primary, t.fg_primary, cx))
-                    .child(row("border_secondary", t.border_secondary, t.fg_primary, cx))
-                    .child(row("border_tertiary", t.border_tertiary, t.fg_primary, cx))
-                    .child(row("border_selected", t.border_selected, t.fg_selected, cx))
-                    .child(row("border_tile_header", t.border_tile_header, t.fg_tile_header, cx)),
+                section("Borders").child(
+                    div()
+                        .flex_col()
+                        .gap_2()
+                        .child(row("border_primary", t.border_primary, t.fg_primary, cx))
+                        .child(row("border_secondary", t.border_secondary, t.fg_primary, cx))
+                        .child(row("border_tertiary", t.border_tertiary, t.fg_primary, cx))
+                        .child(row("border_selected", t.border_selected, t.fg_primary, cx))
+                        .child(row("border_tile_header", t.border_tile_header, t.fg_primary, cx)),
+                ),
             )
-            .child(section("Accents & states", cx))
             .child(
-                div()
-                    .flex_col()
-                    .gap_2()
-                    .child(row("accent", t.accent, t.fg_primary, cx))
-                    .child(
-                        div()
-                            .flex()
-                            .gap_3()
-                            .flex_wrap()
-                            .child(row("accent (hover)", t.accent.hover(), t.fg_primary, cx))
-                            .child(row("accent (active)", t.accent.active(), t.fg_primary, cx))
-                            .child(row("accent (disabled)", t.accent.disabled(), t.fg_primary, cx)),
-                    )
-                    .child(row("warning", t.warning, t.fg_primary, cx))
-                    .child(row("error", t.error, t.fg_primary, cx))
-                    .child(row("success", t.success, t.fg_primary, cx)),
+                section("Accents & States").child(
+                    div()
+                        .flex_col()
+                        .gap_2()
+                        .child(row("accent", t.accent, t.fg_primary, cx))
+                        .child(
+                            div()
+                                .flex()
+                                .gap_3()
+                                .flex_wrap()
+                                .child(row("accent (hover)", t.accent.hover(), t.fg_primary, cx))
+                                .child(row("accent (active)", t.accent.active(), t.fg_primary, cx))
+                                .child(row(
+                                    "accent (disabled)",
+                                    t.accent.disabled(),
+                                    t.fg_primary,
+                                    cx,
+                                )),
+                        )
+                        .child(row("warning", t.warning, t.fg_primary, cx))
+                        .child(row("error", t.error, t.fg_primary, cx))
+                        .child(row("success", t.success, t.fg_primary, cx)),
+                ),
             )
-            .child(section("Title bar", cx))
             .child(
-                div()
-                    .flex_col()
-                    .gap_2()
-                    .child(row("title_bar", t.title_bar, t.fg_primary, cx))
-                    .child(row("title_bar_border", t.title_bar_border, t.fg_primary, cx)),
+                section("Title bar").child(
+                    div()
+                        .flex_col()
+                        .gap_2()
+                        .child(row("title_bar", t.title_bar, t.fg_primary, cx))
+                        .child(row("title_bar_border", t.title_bar_border, t.fg_primary, cx)),
+                ),
             );
 
         div().id("theme-preview").size_full().overflow_scroll().child(content)

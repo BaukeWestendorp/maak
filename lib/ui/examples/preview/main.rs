@@ -1,21 +1,14 @@
-mod binding;
-mod button;
-mod grid;
-mod icon;
-mod org;
-mod settings;
+mod interactive;
+mod misc;
 mod table;
 mod tabs;
 mod theme;
 mod tiles;
-mod title_bar;
 mod typo;
 
 fn main() -> anyhow::Result<()> {
     pretty_env_logger::formatted_builder().filter_level(log::LevelFilter::Debug).init();
-
     app::run()?;
-
     Ok(())
 }
 
@@ -24,17 +17,12 @@ mod app {
     use gpui::{Entity, Window, div};
     use maak_ui::{ConfigAppExt as _, Tab, Tabs, TabsState, TabsVariant};
 
-    use crate::binding::BindingPreview;
-    use crate::button::ButtonPreview;
-    use crate::grid::GridPreview;
-    use crate::icon::IconPreview;
-    use crate::org::OrgPreview;
-    use crate::settings::SettingsPreview;
+    use crate::interactive::InteractivePreview;
+    use crate::misc::MiscPreview;
     use crate::table::TablePreview;
     use crate::tabs::TabsPreview;
     use crate::theme::ThemePreview;
     use crate::tiles::TilesPreview;
-    use crate::title_bar::TitleBarPreview;
     use crate::typo::TypoPreview;
 
     pub fn run() -> anyhow::Result<()> {
@@ -58,18 +46,14 @@ mod app {
     struct PreviewApp {
         tabs: Entity<TabsState>,
 
-        tab_binding: Entity<BindingPreview>,
-        tab_button: Entity<ButtonPreview>,
-        tab_grid: Entity<GridPreview>,
-        tab_icon: Entity<IconPreview>,
-        tab_org: Entity<OrgPreview>,
-        tab_settings: Entity<SettingsPreview>,
+        tab_interactive: Entity<InteractivePreview>,
         tab_tabs: Entity<TabsPreview>,
         tab_table: Entity<TablePreview>,
         tab_theme: Entity<ThemePreview>,
         tab_tiles: Entity<TilesPreview>,
-        tab_title_bar: Entity<TitleBarPreview>,
         tab_typo: Entity<TypoPreview>,
+
+        tab_misc: Entity<MiscPreview>,
     }
 
     impl PreviewApp {
@@ -81,18 +65,13 @@ mod app {
                     TabsState::new().with_selected(selected)
                 }),
 
-                tab_binding: cx.new(|cx| BindingPreview::new(window, cx)),
-                tab_button: cx.new(|cx| ButtonPreview::new(window, cx)),
-                tab_grid: cx.new(|cx| GridPreview::new(window, cx)),
-                tab_icon: cx.new(|cx| IconPreview::new(window, cx)),
-                tab_org: cx.new(|cx| OrgPreview::new(window, cx)),
-                tab_settings: cx.new(|cx| SettingsPreview::new(window, cx)),
+                tab_interactive: cx.new(|cx| InteractivePreview::new(window, cx)),
                 tab_tabs: cx.new(|cx| TabsPreview::new(window, cx)),
                 tab_table: cx.new(|cx| TablePreview::new(window, cx)),
                 tab_theme: cx.new(|cx| ThemePreview::new(window, cx)),
                 tab_tiles: cx.new(|cx| TilesPreview::new(window, cx)),
-                tab_title_bar: cx.new(|cx| TitleBarPreview::new(window, cx)),
                 tab_typo: cx.new(|cx| TypoPreview::new(window, cx)),
+                tab_misc: cx.new(|cx| MiscPreview::new(window, cx)),
             }
         }
     }
@@ -100,23 +79,20 @@ mod app {
     impl Render for PreviewApp {
         fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
             div().size_full().child(
-                Tabs::new("preview-pages", self.tabs.clone(), TabsVariant::Sidebar).tabs([
-                    Tab::new("binding", "Bindings", self.tab_binding.clone().into_any_element()),
-                    Tab::new("button", "Buttons", self.tab_button.clone().into_any_element()),
-                    Tab::new("grid", "Grid", self.tab_grid.clone().into_any_element()),
-                    Tab::new("icon", "Icon", self.tab_icon.clone().into_any_element()),
-                    Tab::new("org", "Organization", self.tab_org.clone().into_any_element()),
-                    Tab::new("settings", "Settings", self.tab_settings.clone().into_any_element()),
-                    Tab::new("table", "Table", self.tab_table.clone().into_any_element()),
-                    Tab::new("tabs", "Tabs", self.tab_tabs.clone().into_any_element()),
-                    Tab::new("tiles", "Tiles", self.tab_tiles.clone().into_any_element()),
-                    Tab::new("theme", "Themes", self.tab_theme.clone().into_any_element()),
+                // FIXME: This should be TabVariant::Sidebar, but the table width breaks if we do.
+                // Fuck that for now...
+                Tabs::new("preview-pages", self.tabs.clone(), TabsVariant::Top).tabs([
                     Tab::new(
-                        "title_bar",
-                        "Title Bar",
-                        self.tab_title_bar.clone().into_any_element(),
+                        "interactive",
+                        "Interactive",
+                        self.tab_interactive.clone().into_any_element(),
                     ),
                     Tab::new("typo", "Typography", self.tab_typo.clone().into_any_element()),
+                    Tab::new("theme", "Theme", self.tab_theme.clone().into_any_element()),
+                    Tab::new("tabs", "Tabs", self.tab_tabs.clone().into_any_element()),
+                    Tab::new("table", "Table", self.tab_table.clone().into_any_element()),
+                    Tab::new("tiles", "Tiles", self.tab_tiles.clone().into_any_element()),
+                    Tab::new("misc", "Miscellaneous", self.tab_misc.clone().into_any_element()),
                 ]),
             )
         }

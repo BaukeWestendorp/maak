@@ -31,12 +31,12 @@ pub use init::simple::build_simple_app;
 pub use org::section;
 pub use root::Root;
 pub use settings::SettingsAppExt;
-pub use table::{Column, Table, TableDelegate, TableState};
+pub use table::{Cell, Column, Table, TableDelegate, TableState};
 pub use tabs::{Tab, Tabs, TabsState, TabsVariant};
 pub use theme::{ActiveTheme, HslaExt};
 pub use tiles::{PoolTile, PoolTileDelegate, TileDelegate, TileGrid, TileGridState};
 pub use title_bar::{TITLE_BAR_HEIGHT, TITLE_BAR_LEFT_PADDING, TITLE_BAR_RIGHT_PADDING, TitleBar};
-pub use typo::{article, h1, h2, h3, h4, h5, h6, link, p, sub};
+pub use typo::{article, h1, h2, h3, h4, h5, h6, link, sub};
 pub use util::todo;
 
 pub use element_ext::ElementExt;
@@ -45,4 +45,7 @@ pub use styled_ext::{StyledExt, h_flex, v_flex};
 #[cfg(feature = "config")]
 pub use feature::config::ConfigAppExt;
 
+#[cfg(feature = "config")]
 pub use ::config;
+
+pub use ::gpui;

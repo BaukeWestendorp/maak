@@ -1,0 +1,9 @@
+[package]
+name = "maak-rico"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+glam = "0.32.1"
+raylib = "5.5.1"
+slotmap = "1.1.1"

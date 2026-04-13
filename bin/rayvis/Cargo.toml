@@ -1,0 +1,7 @@
+[package]
+name = "rayvis"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+maak-rico.workspace = true

@@ -1,4 +1,5 @@
-use gpui::{App, Div, Styled, div, prelude::*};
+use gpui::prelude::*;
+use gpui::{App, Div, Styled, div};
 
 use crate::ActiveTheme;
 
