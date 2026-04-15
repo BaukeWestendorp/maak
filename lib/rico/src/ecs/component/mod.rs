@@ -1,45 +1,60 @@
+use crate::ecs::EntityHandle;
+use crate::engine::{Backend, Scene};
+
 pub mod camera;
+pub mod camera_controller;
 pub mod transform;
 
-pub trait Bundle {
-    fn into_iter(self) -> Box<dyn Iterator<Item = Box<dyn Component>>>;
+pub use camera::*;
+pub use camera_controller::*;
+pub use transform::*;
+
+pub trait Component<B: Backend> {
+    fn as_any(&self) -> &dyn std::any::Any;
+
+    fn setup(&mut self, _entity: EntityHandle, _scene: &Scene<B>, _cx: &mut B) {}
+
+    fn update(&mut self, _delta_time: f32, _entity: EntityHandle, _scene: &Scene<B>, _cx: &mut B) {}
+
+    fn shutdown(&mut self, _entity: EntityHandle, _scene: &Scene<B>, _cx: &mut B) {}
 }
 
-impl<T: Component + 'static> Bundle for T {
-    fn into_iter(self) -> Box<dyn Iterator<Item = Box<dyn Component>>> {
-        Box::new(std::iter::once(Box::new(self) as Box<dyn Component>))
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct ComponentHandle(uuid::Uuid);
+
+impl ComponentHandle {
+    pub(crate) fn new() -> Self {
+        Self(uuid::Uuid::new_v4())
     }
+
+    pub fn as_uuid(&self) -> uuid::Uuid {
+        self.0
+    }
+}
+
+pub trait Bundle<B: Backend> {
+    fn into_components(self) -> Vec<Box<dyn Component<B>>>;
 }
 
 macro_rules! impl_bundle_tuple {
     ($($name:ident),+) => {
         #[allow(non_snake_case)]
-        impl<$($name: Component + 'static),+> Bundle for ($($name,)+) {
-            fn into_iter(self) -> Box<dyn Iterator<Item = Box<dyn Component>>> {
+        impl<B: Backend + 'static, $($name: Component<B> + 'static),+> Bundle<B> for ($($name,)+) {
+            fn into_components(self) -> Vec<Box<dyn Component<B>>> {
                 let ($($name,)+) = self;
-                Box::new(vec![$(Box::new($name) as Box<dyn Component>),+].into_iter())
+                vec![$(Box::new($name) as Box<dyn Component<B>>),+]
             }
         }
     };
 }
 
 impl_bundle_tuple!(A);
-impl_bundle_tuple!(A, B);
-impl_bundle_tuple!(A, B, C);
-impl_bundle_tuple!(A, B, C, D);
-impl_bundle_tuple!(A, B, C, D, E);
-impl_bundle_tuple!(A, B, C, D, E, F);
-impl_bundle_tuple!(A, B, C, D, E, F, G);
-impl_bundle_tuple!(A, B, C, D, E, F, G, H);
-impl_bundle_tuple!(A, B, C, D, E, F, G, H, I);
-impl_bundle_tuple!(A, B, C, D, E, F, G, H, I, J);
-
-pub trait Component {
-    fn as_any(&self) -> &dyn std::any::Any;
-
-    fn setup(&mut self) {}
-
-    fn update(&mut self) {}
-
-    fn shutdown(&mut self) {}
-}
+impl_bundle_tuple!(A, Be);
+impl_bundle_tuple!(A, Be, C);
+impl_bundle_tuple!(A, Be, C, D);
+impl_bundle_tuple!(A, Be, C, D, E);
+impl_bundle_tuple!(A, Be, C, D, E, F);
+impl_bundle_tuple!(A, Be, C, D, E, F, G);
+impl_bundle_tuple!(A, Be, C, D, E, F, G, H);
+impl_bundle_tuple!(A, Be, C, D, E, F, G, H, I);
+impl_bundle_tuple!(A, Be, C, D, E, F, G, H, I, J);

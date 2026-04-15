@@ -1,18 +1,25 @@
-use crate::prelude::*;
+use crate::ecs::ComponentHandle;
 
-slotmap::new_key_type! { pub struct EntityHandle; }
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct EntityHandle(uuid::Uuid);
+
+impl EntityHandle {
+    pub(crate) fn new() -> Self {
+        Self(uuid::Uuid::new_v4())
+    }
+
+    pub fn as_uuid(&self) -> uuid::Uuid {
+        self.0
+    }
+}
 
 pub struct Entity {
-    components: Vec<Box<dyn Component>>,
-    parent: Option<EntityHandle>,
+    pub(crate) components: Vec<ComponentHandle>,
+    pub(crate) parent: Option<EntityHandle>,
 }
 
 impl Entity {
-    pub fn new(bundle: impl Bundle) -> Self {
-        Self { components: bundle.into_iter().collect(), parent: None }
-    }
-
-    pub fn components(&self) -> &[Box<dyn Component + 'static>] {
+    pub fn components(&self) -> &[ComponentHandle] {
         &self.components
     }
 

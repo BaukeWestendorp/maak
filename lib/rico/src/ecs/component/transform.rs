@@ -1,4 +1,5 @@
-use super::Component;
+use crate::ecs::Component;
+use crate::engine::Backend;
 
 #[derive(Debug)]
 pub struct Transform {
@@ -102,7 +103,7 @@ impl Default for Transform {
     }
 }
 
-impl Component for Transform {
+impl<B: Backend> Component<B> for Transform {
     fn as_any(&self) -> &dyn std::any::Any {
         self
     }
