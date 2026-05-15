@@ -27,11 +27,7 @@ impl Default for Camera {
     }
 }
 
-impl<B: Backend> Component<B> for Camera {
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
-}
+impl<B: Backend> Component<B> for Camera {}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Projection {

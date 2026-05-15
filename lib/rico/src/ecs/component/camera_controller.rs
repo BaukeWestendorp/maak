@@ -1,6 +1,6 @@
 use glam::Vec3;
 
-use crate::ecs::{Component, EntityHandle, Transform};
+use crate::ecs::{Component, Transform};
 use crate::engine::{Backend, Scene};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -21,14 +21,11 @@ impl Default for CameraController {
 }
 
 impl<B: Backend> Component<B> for CameraController {
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
-
-    fn update(&mut self, _delta_time: f32, entity: EntityHandle, scene: &Scene<B>, cx: &mut B) {
+    fn update(&mut self, _delta_time: f32, entity: hecs::Entity, scene: &Scene<B>, cx: &mut B) {
         match &mut self.mode {
             CameraMode::Orbit { center, distance } => {
-                let transform = scene.query_in::<Transform>(entity).next().unwrap();
+                todo!();
+                // let transform = scene.query_in::<Transform>(entity).next().unwrap();
 
                 // let delta = cx.get_mouse_delta();
                 // camera.orbit_around(center, delta);

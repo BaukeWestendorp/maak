@@ -6,12 +6,9 @@ fn main() {
 }
 
 fn setup(scene: &mut Scene<RaylibBackend>, _cx: &mut RaylibBackend) {
-    let camera = scene.commands().spawn((
-        Transform::default(),
-        Camera::default(),
-        CameraController::default(),
-    ));
+    let camera =
+        scene.spawn(&[Transform::default(), Camera::default(), CameraController::default()]);
     scene.set_active_camera(Some(camera));
 
-    let _entity = scene.commands().spawn((Transform::default(),));
+    let _entity = scene.spawn(&[Transform::default()]);
 }

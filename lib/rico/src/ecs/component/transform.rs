@@ -103,8 +103,4 @@ impl Default for Transform {
     }
 }
 
-impl<B: Backend> Component<B> for Transform {
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
-}
+impl<B: Backend> Component<B> for Transform {}
