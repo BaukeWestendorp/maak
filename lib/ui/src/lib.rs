@@ -30,6 +30,7 @@ pub use init::init;
 pub use init::simple::build_simple_app;
 pub use org::section;
 pub use root::Root;
+pub use scrollable::{Scrollable, ScrollableState};
 pub use settings::SettingsAppExt;
 pub use table::{Cell, Column, Table, TableDelegate, TableState};
 pub use tabs::{Tab, Tabs, TabsState, TabsVariant};

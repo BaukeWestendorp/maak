@@ -80,6 +80,8 @@ pub struct Theme {
     pub error: Hsla,
     pub success: Hsla,
 
+    pub contrast: Hsla,
+
     pub title_bar: Hsla,
     pub title_bar_border: Hsla,
 
@@ -128,6 +130,8 @@ impl Theme {
             error: rgb(0xed2320).into(),
             success: rgb(0x3bb273).into(),
 
+            contrast: rgb(0x000000).into(),
+
             title_bar: hsla(0.083, 0.037, 0.894, 1.).into(),
             title_bar_border: hsla(0., 0., 0.8, 1.).into(),
 
@@ -166,6 +170,8 @@ impl Theme {
             warning: rgb(0xffc94d).into(),
             error: rgb(0xed2320).into(),
             success: rgb(0x3bb273).into(),
+
+            contrast: rgb(0xffffff).into(),
 
             title_bar: rgb(0x1c1b1a).into(),
             title_bar_border: rgb(0x353535).into(),

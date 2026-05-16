@@ -15,3 +15,8 @@ pub fn todo(cx: &App) -> Div {
         .items_center()
         .child("TODO")
 }
+
+pub fn z_stack(children: impl IntoIterator<Item = impl IntoElement>) -> Div {
+    let children = children.into_iter().map(|child| div().size_full().child(child).absolute());
+    div().relative().children(children)
+}
