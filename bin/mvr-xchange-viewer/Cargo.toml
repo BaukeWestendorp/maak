@@ -1,7 +1,0 @@
-[package]
-name = "mvr-xchange-viewer"
-version.workspace = true
-edition.workspace = true
-
-[dependencies]
-maak-ui = { workspace = true, features = ["config"] }
