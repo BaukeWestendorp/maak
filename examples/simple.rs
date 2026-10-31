@@ -2,40 +2,37 @@ use std::path::Path;
 
 use maak::{
     plugin::{
-        render::{Camera, Material, Mesh, MeshRenderer, RenderPlugin, RenderState},
+        render::{BindGroupLayouts, Camera, Material, Mesh, MeshRenderer, RenderPlugin},
         time::{Time, TimePlugin},
-        window::WindowPlugin,
     },
     prelude::*,
+    runner::WgpuHandles,
 };
 
 fn main() {
-    let mut app = App::new();
+    let mut engine = Engine::new(StandardRunner);
 
-    app.add_plugin(WindowPlugin {
-        title: "Maak".to_string(),
-        width: 800,
-        height: 600,
-    });
-    app.add_plugin(TimePlugin);
-    app.add_plugin(RenderPlugin);
+    engine.add_plugin(TimePlugin);
+    engine.add_plugin(RenderPlugin);
 
-    app.add_setup_system(setup_scene);
-    app.add_update_system(rotate_cubes);
+    engine.add_setup_system(setup_scene);
+    engine.add_update_system(rotate_cubes);
 
-    app.run();
+    engine.run();
 }
 
 fn setup_scene(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<Material>>,
-    render: Res<RenderState>,
+    wgpu_handles: Res<WgpuHandles>,
+    bind_group_layouts: Res<BindGroupLayouts>,
 ) {
-    let cube_mesh = meshes.add(Mesh::cube(&render));
+    let cube_mesh = meshes.add(Mesh::cube(&wgpu_handles));
 
     let custom_mat = materials.add(Material::new(
-        &render,
+        &wgpu_handles,
+        &bind_group_layouts,
         Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/simple.wgsl"),
     ));
 
@@ -62,7 +59,7 @@ fn rotate_cubes(
     mut camera: ResMut<Camera>,
     // mut query: Query<&mut LocalTransform, With<MeshRenderer>>
 ) {
-    camera.translation = Vec3::new(0.0, 0.0, time.elapsed_seconds());
+    camera.translation = Vec3::new(0.0, 0.0, time.elapsed_seconds() * 5.0);
     // for mut transform in query.iter_mut() {
     //     transform.rotate_y(time.delta_seconds() * 2.0);
     // }

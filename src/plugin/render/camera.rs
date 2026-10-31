@@ -1,6 +1,6 @@
 use bevy_ecs::resource::Resource;
 
-use crate::plugin::render::{RenderState, Uniform};
+use crate::{plugin::render::Uniform, runner::WgpuHandles};
 
 #[derive(Debug, Resource)]
 pub struct Camera {
@@ -36,6 +36,10 @@ impl Camera {
             self.far,
         )
     }
+
+    pub fn view_proj_matrix(&self) -> glam::Mat4 {
+        self.proj_matrix() * self.view_matrix()
+    }
 }
 
 #[derive(Debug, Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
@@ -44,24 +48,27 @@ pub(super) struct CameraUniformData {
     pub view_proj: [[f32; 4]; 4],
 }
 
+impl CameraUniformData {
+    pub fn new(camera: &Camera) -> Self {
+        Self {
+            view_proj: camera.view_proj_matrix().to_cols_array_2d(),
+        }
+    }
+}
+
 #[derive(Resource)]
 pub(super) struct CameraBinding {
     pub uniform: Uniform<CameraUniformData>,
 }
 
 impl CameraBinding {
-    pub fn new(render_state: &RenderState) -> Self {
+    pub fn new(wgpu_handles: &WgpuHandles, bind_group_layout: &wgpu::BindGroupLayout) -> Self {
         let data = CameraUniformData {
             view_proj: glam::Mat4::IDENTITY.to_cols_array_2d(),
         };
 
         Self {
-            uniform: Uniform::new(
-                render_state,
-                &data,
-                &render_state.camera_layout,
-                "Camera Uniform",
-            ),
+            uniform: Uniform::new(wgpu_handles, &data, bind_group_layout, "Camera Uniform"),
         }
     }
 }

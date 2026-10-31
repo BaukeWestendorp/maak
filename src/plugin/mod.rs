@@ -1,9 +1,8 @@
-use crate::app::App;
+use crate::{engine::Engine, runner::Runner};
 
 pub mod render;
 pub mod time;
-pub mod window;
 
-pub trait Plugin {
-    fn build(&self, app: &mut App);
+pub trait Plugin<R: Runner> {
+    fn build(&self, engine: &mut Engine<R>);
 }

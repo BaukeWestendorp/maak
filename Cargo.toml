@@ -10,7 +10,8 @@ required-features = ["egui"]
 [dependencies]
 anyhow = "1.0.104"
 
-bevy_ecs = "0.20.0"
+# FIXME: Add feature "debug" for debug builds.
+bevy_ecs = { version = "0.20.0", features = [] }
 glam = "0.34.1"
 pollster = "1.0.1"
 

@@ -3,7 +3,7 @@ use wgpu::util::DeviceExt as _;
 
 use crate::{
     asset::AssetHandle,
-    plugin::render::{Material, RenderState},
+    plugin::render::{Material, WgpuHandles},
 };
 
 #[derive(Debug, Resource)]
@@ -14,7 +14,7 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn cube(render_state: &RenderState) -> Self {
+    pub fn cube(WgpuHandles { device, .. }: &WgpuHandles) -> Self {
         #[rustfmt::skip]
        let vertices: &[f32] = &[
             -0.5, -0.5, -0.5,
@@ -37,23 +37,17 @@ impl Mesh {
             1, 2, 6, 6, 5, 1,
         ];
 
-        let vertex_buffer =
-            render_state
-                .device
-                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                    label: Some("Cube Vertex Buffer"),
-                    contents: bytemuck::cast_slice(vertices),
-                    usage: wgpu::BufferUsages::VERTEX,
-                });
+        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Cube Vertex Buffer"),
+            contents: bytemuck::cast_slice(vertices),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
 
-        let index_buffer =
-            render_state
-                .device
-                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                    label: Some("Cube Index Buffer"),
-                    contents: bytemuck::cast_slice(indices),
-                    usage: wgpu::BufferUsages::INDEX,
-                });
+        let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Cube Index Buffer"),
+            contents: bytemuck::cast_slice(indices),
+            usage: wgpu::BufferUsages::INDEX,
+        });
 
         let index_count = indices.len() as u32;
 
