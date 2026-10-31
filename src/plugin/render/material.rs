@@ -2,7 +2,7 @@ use std::path::Path;
 
 use bevy_ecs::resource::Resource;
 
-use crate::plugin::render::{BindGroupLayouts, WgpuHandles};
+use crate::plugin::render::{Camera, WgpuHandles};
 
 #[derive(Debug, Resource)]
 pub struct Material {
@@ -16,7 +16,7 @@ impl Material {
             device,
             ..
         }: &WgpuHandles,
-        bind_group_layouts: &BindGroupLayouts,
+        camera: &Camera,
         shader_path: impl AsRef<Path>,
     ) -> Self {
         let shader_source =
@@ -29,7 +29,7 @@ impl Material {
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Material Pipeline Layout"),
-            bind_group_layouts: &[Some(&bind_group_layouts.camera)],
+            bind_group_layouts: &[Some(camera.bind_group_layout())],
             immediate_size: 0,
         });
 

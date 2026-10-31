@@ -35,6 +35,12 @@ pub struct WgpuHandles {
 #[derive(Resource)]
 pub struct WindowHandle(Arc<winit::window::Window>);
 
+impl WindowHandle {
+    pub fn aspect_ratio(&self) -> f32 {
+        self.0.inner_size().width as f32 / self.0.inner_size().height as f32
+    }
+}
+
 impl Deref for WindowHandle {
     type Target = Arc<winit::window::Window>;
 

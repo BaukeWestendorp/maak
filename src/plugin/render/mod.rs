@@ -1,5 +1,4 @@
-use bevy_ecs::resource::Resource;
-use bevy_ecs::system::{Query, Res, ResMut};
+use bevy_ecs::system::{Query, Res};
 
 use crate::runner::WindowHandle;
 use crate::{
@@ -25,64 +24,25 @@ impl<R: Runner> Plugin<R> for RenderPlugin {
     fn build(&self, engine: &mut Engine<R>) {
         let world = engine.world();
 
-        let aspect_ratio = {
-            let window = world.get_resource::<WindowHandle>().unwrap();
-            window.inner_size().width as f32 / window.inner_size().height as f32
-        };
-        world.insert_resource(Camera::new(aspect_ratio));
+        let window_handle = world.get_resource::<WindowHandle>().unwrap();
+        let wgpu_handles = world.resource::<WgpuHandles>();
+        world.insert_resource(Camera::new(window_handle.aspect_ratio(), wgpu_handles));
 
         world.insert_resource(Assets::<Mesh>::new());
         world.insert_resource(Assets::<Material>::new());
 
-        let wgpu_handles = world.resource::<WgpuHandles>();
-
-        let camera_bind_group_layout =
-            wgpu_handles
-                .device
-                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                    label: Some("Camera Bind Group Layout"),
-                    entries: &[wgpu::BindGroupLayoutEntry {
-                        binding: 0,
-                        visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
-                        ty: wgpu::BindingType::Buffer {
-                            ty: wgpu::BufferBindingType::Uniform,
-                            has_dynamic_offset: false,
-                            min_binding_size: None,
-                        },
-                        count: None,
-                    }],
-                });
-
-        world.insert_resource(CameraBinding::new(wgpu_handles, &camera_bind_group_layout));
-
-        engine.world().insert_resource(BindGroupLayouts {
-            camera: camera_bind_group_layout,
-        });
-
-        engine.add_update_system(render_system);
+        engine.add_update_system(camera::update);
+        engine.add_update_system(self::update);
     }
 }
 
-fn render_system(
+fn update(
     wgpu_handles: Res<WgpuHandles>,
-    window_handle: Res<WindowHandle>,
-    mut camera: ResMut<Camera>,
-    camera_binding: Res<CameraBinding>,
+    camera: Res<Camera>,
     meshes: Res<Assets<Mesh>>,
     materials: Res<Assets<Material>>,
     renderables: Query<&MeshRenderer>,
 ) {
-    let aspect_ratio = {
-        let window = window_handle;
-        window.inner_size().width as f32 / window.inner_size().height as f32
-    };
-    camera.aspect_ratio = aspect_ratio;
-
-    let camera_uniform_data = CameraUniformData::new(&camera);
-    camera_binding
-        .uniform
-        .write(&wgpu_handles, &camera_uniform_data);
-
     let mut frame_to_present = None;
     let surface_view;
     let view = match &wgpu_handles.render_target {
@@ -133,7 +93,7 @@ fn render_system(
             multiview_mask: None,
         });
 
-        pass.set_bind_group(0, camera_binding.uniform.bind_group(), &[]);
+        pass.set_bind_group(0, camera.binding().uniform.bind_group(), &[]);
 
         for renderer in renderables.iter() {
             if let (Some(mesh), Some(material)) = (
@@ -153,9 +113,4 @@ fn render_system(
     if let Some(frame) = frame_to_present {
         wgpu_handles.queue.present(frame);
     }
-}
-
-#[derive(Resource)]
-pub struct BindGroupLayouts {
-    pub camera: wgpu::BindGroupLayout,
 }

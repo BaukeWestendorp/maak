@@ -2,7 +2,7 @@ use std::path::Path;
 
 use maak::{
     plugin::{
-        render::{BindGroupLayouts, Camera, Material, Mesh, MeshRenderer, RenderPlugin},
+        render::{Camera, Material, Mesh, MeshRenderer, RenderPlugin},
         time::{Time, TimePlugin},
     },
     prelude::*,
@@ -26,13 +26,13 @@ fn setup_scene(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<Material>>,
     wgpu_handles: Res<WgpuHandles>,
-    bind_group_layouts: Res<BindGroupLayouts>,
+    camera: Res<Camera>,
 ) {
     let cube_mesh = meshes.add(Mesh::cube(&wgpu_handles));
 
     let custom_mat = materials.add(Material::new(
         &wgpu_handles,
-        &bind_group_layouts,
+        &camera,
         Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/simple.wgsl"),
     ));
 

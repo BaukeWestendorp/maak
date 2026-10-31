@@ -1,8 +1,14 @@
-use bevy_ecs::resource::Resource;
+use bevy_ecs::{
+    resource::Resource,
+    system::{Res, ResMut},
+};
 
-use crate::{plugin::render::Uniform, runner::WgpuHandles};
+use crate::{
+    plugin::render::Uniform,
+    runner::{WgpuHandles, WindowHandle},
+};
 
-#[derive(Debug, Resource)]
+#[derive(Resource)]
 pub struct Camera {
     pub translation: glam::Vec3,
     pub rotation: glam::Quat,
@@ -10,10 +16,32 @@ pub struct Camera {
     pub aspect_ratio: f32,
     pub near: f32,
     pub far: f32,
+
+    bind_group_layout: wgpu::BindGroupLayout,
+    binding: CameraBinding,
 }
 
 impl Camera {
-    pub fn new(aspect_ratio: f32) -> Self {
+    pub fn new(aspect_ratio: f32, wgpu_handles: &WgpuHandles) -> Self {
+        let bind_group_layout =
+            wgpu_handles
+                .device
+                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                    label: Some("Camera Bind Group Layout"),
+                    entries: &[wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Uniform,
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    }],
+                });
+
+        let binding = CameraBinding::new(wgpu_handles, &bind_group_layout);
+
         Self {
             translation: glam::Vec3::new(0.0, 0.0, 5.0),
             rotation: glam::Quat::IDENTITY,
@@ -21,7 +49,18 @@ impl Camera {
             aspect_ratio,
             near: 0.001,
             far: 1000.0,
+
+            bind_group_layout,
+            binding,
         }
+    }
+
+    pub fn bind_group_layout(&self) -> &wgpu::BindGroupLayout {
+        &self.bind_group_layout
+    }
+
+    pub fn binding(&self) -> &CameraBinding {
+        &self.binding
     }
 
     pub fn view_matrix(&self) -> glam::Mat4 {
@@ -42,9 +81,24 @@ impl Camera {
     }
 }
 
+pub(super) fn update(
+    window_handle: Res<WindowHandle>,
+    wgpu_handles: Res<WgpuHandles>,
+    mut camera: ResMut<Camera>,
+) {
+    camera.aspect_ratio = window_handle.aspect_ratio();
+
+    let camera_uniform_data = CameraUniformData::new(&camera);
+
+    camera
+        .binding
+        .uniform
+        .write(&wgpu_handles, &camera_uniform_data);
+}
+
 #[derive(Debug, Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
 #[repr(C)]
-pub(super) struct CameraUniformData {
+pub struct CameraUniformData {
     pub view_proj: [[f32; 4]; 4],
 }
 
@@ -57,7 +111,7 @@ impl CameraUniformData {
 }
 
 #[derive(Resource)]
-pub(super) struct CameraBinding {
+pub struct CameraBinding {
     pub uniform: Uniform<CameraUniformData>,
 }
 
