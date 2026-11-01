@@ -94,6 +94,30 @@ impl winit::application::ApplicationHandler for App<'_> {
                 input_state.mouse.cursor.position =
                     glam::vec2(position.x as f32, position.y as f32);
             }
+            winit::event::WindowEvent::Resized(size) => {
+                if size.width == 0 || size.height == 0 {
+                    return;
+                }
+
+                let Some(wgpu_handles) = self.engine.world().get_resource_mut::<WgpuHandles>()
+                else {
+                    return;
+                };
+
+                let RenderTarget::Surface(surface) = &wgpu_handles.render_target else {
+                    return;
+                };
+
+                surface.configure(
+                    &wgpu_handles.device,
+                    &wgpu::SurfaceConfiguration {
+                        present_mode: wgpu::PresentMode::AutoVsync,
+                        ..surface
+                            .get_default_config(&wgpu_handles.adapter, size.width, size.height)
+                            .expect("Failed to get default surface configuration")
+                    },
+                );
+            }
             winit::event::WindowEvent::RedrawRequested => {
                 self.engine.update();
 
