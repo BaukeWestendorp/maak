@@ -2,8 +2,10 @@ use std::path::Path;
 
 use maak::{
     plugin::{
+        camera_control::CameraControlPlugin,
         render::{Camera, Material, Mesh, MeshRenderer, RenderPlugin},
         time::{Time, TimePlugin},
+        transform::{GlobalTransform, TransformPlugin},
     },
     prelude::*,
     runner::WgpuHandles,
@@ -14,6 +16,8 @@ fn main() {
 
     engine.add_plugin(TimePlugin);
     engine.add_plugin(RenderPlugin);
+    engine.add_plugin(TransformPlugin);
+    engine.add_plugin(CameraControlPlugin);
 
     engine.add_setup_system(setup_scene);
     engine.add_update_system(rotate_cubes);
@@ -22,11 +26,11 @@ fn main() {
 }
 
 fn setup_scene(
+    camera: Res<Camera>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<Material>>,
     wgpu_handles: Res<WgpuHandles>,
-    camera: Res<Camera>,
 ) {
     let cube_mesh = meshes.add(Mesh::cube(&wgpu_handles));
 
@@ -36,31 +40,19 @@ fn setup_scene(
         Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/simple.wgsl"),
     ));
 
-    commands
-        .spawn((
-            // LocalTransform::from_translation(Vec3::new(0.0, 0.0, -5.0)),
-            // GlobalTransform::default(),
-            Name::new("Parent Entity"),
-        ))
-        .with_children(|parent| {
-            parent.spawn((
-                MeshRenderer {
-                    mesh: cube_mesh.clone(),
-                    material: custom_mat.clone(),
-                },
-                // LocalTransform::from_translation(Vec3::new(2.0, 0.0, 0.0)),
-                // GlobalTransform::default(),
-            ));
-        });
+    commands.spawn((
+        GlobalTransform::default(),
+        MeshRenderer {
+            mesh: cube_mesh.clone(),
+            material: custom_mat.clone(),
+        },
+    ));
 }
 
-fn rotate_cubes(
-    time: Res<Time>,
-    mut camera: ResMut<Camera>,
-    // mut query: Query<&mut LocalTransform, With<MeshRenderer>>
-) {
-    camera.translation = Vec3::new(0.0, 0.0, time.elapsed_seconds() * 5.0);
-    // for mut transform in query.iter_mut() {
-    //     transform.rotate_y(time.delta_seconds() * 2.0);
-    // }
+fn rotate_cubes(time: Res<Time>, mut query: Query<&mut GlobalTransform, With<MeshRenderer>>) {
+    for mut transform in query.iter_mut() {
+        let mut rotation = transform.rotation();
+        rotation = rotation * glam::Quat::from_rotation_y(0.5 * time.delta_seconds());
+        transform.set_rotation(rotation);
+    }
 }

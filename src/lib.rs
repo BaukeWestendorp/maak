@@ -2,6 +2,7 @@ pub mod prelude {
     pub use crate::asset::*;
     pub use crate::ecs::prelude::*;
     pub use crate::engine::*;
+    pub use crate::input::*;
     pub use crate::math::prelude::*;
     pub use crate::plugin::*;
     pub use crate::runner::standard::StandardRunner;
@@ -9,6 +10,7 @@ pub mod prelude {
 
 pub mod asset;
 pub mod engine;
+pub mod input;
 pub mod plugin;
 pub mod runner;
 pub use ::bevy_ecs as ecs;

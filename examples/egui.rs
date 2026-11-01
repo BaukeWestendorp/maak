@@ -4,8 +4,10 @@ use std::{path::Path, sync::Arc};
 
 use maak::{
     plugin::{
+        camera_control::CameraControlPlugin,
         render::{Camera, Material, Mesh, MeshRenderer, RenderPlugin},
-        time::{Time, TimePlugin},
+        time::TimePlugin,
+        transform::{GlobalTransform, TransformPlugin},
     },
     prelude::*,
     runner::{
@@ -37,11 +39,12 @@ impl Application {
         let wgpu_render_state = cc.wgpu_render_state.clone().unwrap();
         let mut engine = Engine::new(EguiRunner::new(winit_window, wgpu_render_state));
 
-        engine.add_plugin(TimePlugin);
         engine.add_plugin(RenderPlugin);
+        engine.add_plugin(TransformPlugin);
+        engine.add_plugin(TimePlugin);
+        engine.add_plugin(CameraControlPlugin);
 
         engine.add_setup_system(setup_scene);
-        engine.add_update_system(rotate_cubes);
 
         engine.run();
 
@@ -60,11 +63,11 @@ impl eframe::App for Application {
 }
 
 fn setup_scene(
+    camera: Res<Camera>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<Material>>,
     wgpu_handles: Res<WgpuHandles>,
-    camera: Res<Camera>,
 ) {
     let cube_mesh = meshes.add(Mesh::cube(&wgpu_handles));
 
@@ -77,13 +80,12 @@ fn setup_scene(
     commands
         .spawn((Name::new("Parent Entity"),))
         .with_children(|parent| {
-            parent.spawn((MeshRenderer {
-                mesh: cube_mesh.clone(),
-                material: custom_mat.clone(),
-            },));
+            parent.spawn((
+                GlobalTransform::default(),
+                MeshRenderer {
+                    mesh: cube_mesh.clone(),
+                    material: custom_mat.clone(),
+                },
+            ));
         });
-}
-
-fn rotate_cubes(time: Res<Time>, mut camera: ResMut<Camera>) {
-    camera.translation = Vec3::new(0.0, 0.0, time.elapsed_seconds() * 5.0);
 }

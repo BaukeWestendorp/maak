@@ -45,7 +45,7 @@ impl Camera {
         Self {
             translation: glam::Vec3::new(0.0, 0.0, 5.0),
             rotation: glam::Quat::IDENTITY,
-            fov: 90.0_f32.to_radians(),
+            fov: 90.0_f32,
             aspect_ratio,
             near: 0.001,
             far: 1000.0,
@@ -78,6 +78,18 @@ impl Camera {
 
     pub fn view_proj_matrix(&self) -> glam::Mat4 {
         self.proj_matrix() * self.view_matrix()
+    }
+
+    pub fn forward(&self) -> glam::Vec3 {
+        self.rotation * glam::Vec3::NEG_Z
+    }
+
+    pub fn right(&self) -> glam::Vec3 {
+        self.rotation * glam::Vec3::X
+    }
+
+    pub fn up(&self) -> glam::Vec3 {
+        self.rotation * glam::Vec3::Y
     }
 }
 

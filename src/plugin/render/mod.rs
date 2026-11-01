@@ -1,5 +1,9 @@
+use std::collections::HashMap;
+
 use bevy_ecs::system::{Query, Res};
 
+use crate::asset::AssetHandle;
+use crate::plugin::transform::GlobalTransform;
 use crate::runner::WindowHandle;
 use crate::{
     asset::Assets,
@@ -41,7 +45,7 @@ fn update(
     camera: Res<Camera>,
     meshes: Res<Assets<Mesh>>,
     materials: Res<Assets<Material>>,
-    renderables: Query<&MeshRenderer>,
+    renderables: Query<(&MeshRenderer, &GlobalTransform)>,
 ) {
     let mut frame_to_present = None;
     let surface_view;
@@ -64,11 +68,41 @@ fn update(
         crate::runner::RenderTarget::Texture(tex_view) => tex_view,
     };
 
+    render(&wgpu_handles, view, camera, meshes, materials, renderables);
+
+    if let Some(frame) = frame_to_present {
+        wgpu_handles.queue.present(frame);
+    }
+}
+
+fn render(
+    wgpu_handles: &WgpuHandles,
+    view: &wgpu::TextureView,
+    camera: Res<Camera>,
+    meshes: Res<Assets<Mesh>>,
+    materials: Res<Assets<Material>>,
+    renderables: Query<(&MeshRenderer, &GlobalTransform)>,
+) {
+    use wgpu::util::DeviceExt as _;
+
     let mut encoder = wgpu_handles
         .device
         .create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Render Encoder"),
         });
+
+    let mut render_batches: HashMap<(AssetHandle<Mesh>, AssetHandle<Material>), Vec<InstanceRaw>> =
+        HashMap::new();
+
+    for (renderer, transform) in renderables.iter() {
+        let instance = InstanceRaw {
+            model: glam::Mat4::from(transform.affine()).to_cols_array_2d(),
+        };
+        render_batches
+            .entry((renderer.mesh.clone(), renderer.material.clone()))
+            .or_default()
+            .push(instance);
+    }
 
     {
         let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -95,22 +129,29 @@ fn update(
 
         pass.set_bind_group(0, camera.binding().uniform.bind_group(), &[]);
 
-        for renderer in renderables.iter() {
-            if let (Some(mesh), Some(material)) = (
-                meshes.get(&renderer.mesh),
-                materials.get(&renderer.material),
-            ) {
+        for ((mesh_handle, mat_handle), instances) in render_batches {
+            if let (Some(mesh), Some(material)) =
+                (meshes.get(&mesh_handle), materials.get(&mat_handle))
+            {
+                // FIXME: Resize this buffer instead of creating a new one each frame.
+                let instance_buffer =
+                    wgpu_handles
+                        .device
+                        .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                            label: Some("Instance Buffer"),
+                            contents: bytemuck::cast_slice(&instances),
+                            usage: wgpu::BufferUsages::VERTEX,
+                        });
+
                 pass.set_pipeline(&material.pipeline);
                 pass.set_vertex_buffer(0, mesh.vertex_buffer.slice(..));
+                pass.set_vertex_buffer(1, instance_buffer.slice(..));
                 pass.set_index_buffer(mesh.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-                pass.draw_indexed(0..mesh.index_count, 0, 0..1);
+
+                pass.draw_indexed(0..mesh.index_count, 0, 0..instances.len() as u32);
             }
         }
     }
 
     wgpu_handles.queue.submit(Some(encoder.finish()));
-
-    if let Some(frame) = frame_to_present {
-        wgpu_handles.queue.present(frame);
-    }
 }
